@@ -1,6 +1,6 @@
 ---
 title: "EcoTopic2_eBird"
-author: "Stellah" + mEEEEEEE
+author: "Stellah" 
 date: "2026-03-03"
 output: html_document
 ---
