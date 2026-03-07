@@ -48,6 +48,7 @@ Link: https://www.bts.gov/geospatial/national-transportation-noise-map
 #head() all of these datasets to get a feel for their contents 
 ```
 
+
 NP Histogram
 ```{r}
 #make a histogram of the distribution of decibels of NP in NY to understand the data
@@ -83,6 +84,7 @@ Exploring overall linear relationship
 Diving into specific species  
 ```{r}
 #find the top 5 most common birds in the dataset and compare them 
+##consider ecological research to determine choice 
 
 #create boxplots for the relationship between noise pollution index and each species count (differentiate by color)
 ```
