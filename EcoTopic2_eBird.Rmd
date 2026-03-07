@@ -33,14 +33,41 @@ Library
 ```{r}
 #library any new packages we need to analyze 
 #comment what the package will be used for 
+library(dplyr)
+library(terra)
+library(sf)
 ```
 
 Loading Data
 ```{r}
 #load in data 
+ny_raster_np_data <- rast('/Users/smarient/Documents/MacalesterCollege /Spring2026/BigDataEcology/EcoTopic2_NY/NY_rail_road_and_aviation_noise_2020.tif')
 
+#preliminary map
+plot(ny_raster_np_data,
+  col = terrain.colors(100),
+  main = "Noise Pollution Map",
+  xlab = "Longitude",
+  ylab = "Latitude",
+  legend = TRUE)
+
+#convert all zeroes to 45 decibels 
+ny_raster_np_data[ny_raster_np_data == 0] <- 45
+plot(ny_raster_np_data)
+ny_raster_np_agg <- aggregate(ny_raster_np_data, fact = 5, fun = mean)
+plot(ny_raster_np_agg, col = rev(terrain.colors(50)))
+hist(ny_raster_np_data)
+```
+
+```{r}
+nyc_boundary <- ext(1800000, 1900000, 2100000, 2230000)
+nyc_crop <- crop (ny_raster_np_agg, nyc_boundary)
+plot(nyc_crop, col = rev(terrain.colors(50)))
+```
+
+```{r}
 ##NP -- DOT Transportation 2020, clipping NYS: Continental U.S. road, freight and passenger rail, and aviation noise 2020
-Link: https:/www.bts.gov/geospatial/national-transportation-noise-map 
+#Link: https:/www.bts.gov/geospatial/national-transportation-noise-map 
 
 ##EBird -- NY State data for 2020
 ##Counties -- NY State country boundaries
@@ -49,6 +76,7 @@ Link: https:/www.bts.gov/geospatial/national-transportation-noise-map
 
 #head() all of these datasets to get a feel for their contents 
 ```
+
 
 
 NP Histogram
