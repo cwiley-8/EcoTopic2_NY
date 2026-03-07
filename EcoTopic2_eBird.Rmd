@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 This is me changing something... 
+Stellah Change 
 
 ## R Markdown
 
@@ -39,7 +40,7 @@ Loading Data
 #load in data 
 
 ##NP -- DOT Transportation 2020, clipping NYS: Continental U.S. road, freight and passenger rail, and aviation noise 2020
-Link: https://www.bts.gov/geospatial/national-transportation-noise-map 
+Link: https:/www.bts.gov/geospatial/national-transportation-noise-map 
 
 ##EBird -- NY State data for 2020
 ##Counties -- NY State country boundaries
