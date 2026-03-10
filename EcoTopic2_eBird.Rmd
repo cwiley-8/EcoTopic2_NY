@@ -36,7 +36,9 @@ Library
 library(dplyr)
 library(terra)
 library(sf)
+library(tmap)
 library(maps)
+library(ggplot2)
 ```
 
 Loading Data
@@ -57,8 +59,15 @@ bird_wrangled<- bird_raw_data%>%
 
 head(bird_wrangled)
 
+bird_wrangled <- bird_wrangled %>%
+  dplyr::mutate(
+    LATITUDE = as.numeric(LATITUDE),
+    LONGITUDE = as.numeric(LONGITUDE)
+  )%>%
+ dplyr::filter(!is.na(LATITUDE) & !is.na(LONGITUDE))
+
 bird_nyc <- bird_wrangled%>%
-  c("Bronx", "Kings", "New York", "Queens", "Richmond")
+  filter(COUNTY %in% c("Bronx", "Kings", "New York", "Queens", "Richmond"))
 
 #preliminary map
 plot(ny_raster_np_data,
@@ -116,8 +125,21 @@ Bird aggregation by county investigation
 
 #preliminary map
 
-initial_bird_map <- map_data("bird_nyc")
+bird_spatial <- st_as_sf(bird_nyc, 
+                         coords = c("LONGITUDE", "LATITUDE"), 
+                         crs = 4326)
 
+bird_initial_map <- tm_shape(bird_spatial)+
+  tm_dots("COUNTY")
+
+colnames(bird_spatial)
+
+bird_initial_map
+
+initial_bird_map <- ggplot(as.data.frame(bird_wrangled)) + 
+  geom_point(aes(x = "LONGITUDE", y = "LATITUDE"), size = 3)
+  
+initial_bird_map
 #aggregate bird sightings by county 
 
 #make a histogram of the distribution of bird observations by county
