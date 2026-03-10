@@ -36,6 +36,7 @@ Library
 library(dplyr)
 library(terra)
 library(sf)
+library(maps)
 ```
 
 Loading Data
@@ -45,7 +46,7 @@ ny_raster_np_data <- rast('/Users/smarient/Documents/MacalesterCollege /Spring20
 
 #load in ebird data 
 
-bird_raw_data <- read.table('~/Library/CloudStorage/GoogleDrive-cwiley@macalester.edu/My Drive/1A: Spring 2026/Big Data in Ecology/EcoTopic2/ebd_US-NY_202001_202012_smp_relJan-2026/ebd_US-NY_202001_202012_smp_relJan-2026.txt', sep = "\t", header = TRUE, fill = TRUE)
+bird_raw_data <- read.table('~/Library/CloudStorage/GoogleDrive-cwiley@macalester.edu/My Drive/1A: Spring 2026/Big Data in Ecology/EcoTopic2/Eco_Topic2_NY/ebd_US-NY_202001_202012_smp_relJan-2026/ebd_US-NY_202001_202012_smp_relJan-2026.txt', sep = "\t", header = TRUE, fill = TRUE)
 
 head(bird_raw_data)
 
@@ -55,6 +56,9 @@ bird_wrangled<- bird_raw_data%>%
   select(-LAST.EDITED.DATE, -TAXON.CONCEPT.ID, -EXOTIC.CODE, -BREEDING.CODE, -BREEDING.CATEGORY, -BEHAVIOR.CODE, -AGE.SEX, -COUNTRY, -COUNTRY.CODE, -STATE, -STATE.CODE, -OBSERVER.ID, -OBSERVER.ORCID.ID, -SAMPLING.EVENT.IDENTIFIER, -PROTOCOL.NAME, -PROTOCOL.CODE, -PROJECT.NAMES, -PROJECT.IDENTIFIERS, -APPROVED, -REVIEWED, -REASON, -HAS.MEDIA, -GROUP.IDENTIFIER, -NUMBER.OBSERVERS, -EFFORT.DISTANCE.KM, -EFFORT.AREA.HA, -DURATION.MINUTES)
 
 head(bird_wrangled)
+
+bird_nyc <- bird_wrangled%>%
+  c("Bronx", "Kings", "New York", "Queens", "Richmond")
 
 #preliminary map
 plot(ny_raster_np_data,
@@ -73,9 +77,9 @@ hist(ny_raster_np_data)
 ```
 
 ```{r}
-nyc_boundary <- ext(1800000, 1900000, 2100000, 2230000)
-nyc_crop <- crop (ny_raster_np_agg, nyc_boundary)
-plot(nyc_crop, col = rev(terrain.colors(50)))
+nyc_npboundary <- ext(1800000, 1900000, 2100000, 2230000)
+nyc_npcrop <- crop (ny_raster_np_agg, nyc_boundary)
+plot(nyc_npcrop, col = rev(terrain.colors(50)))
 ```
 
 ```{r}
@@ -111,6 +115,8 @@ Bird aggregation by county investigation
 #basic map of all bird sightings in NY in 2020 to see if aggregating by county (which we suspect will be effective) is actually a good way to group the data
 
 #preliminary map
+
+initial_bird_map <- map_data("bird_nyc")
 
 #aggregate bird sightings by county 
 
