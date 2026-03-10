@@ -43,6 +43,19 @@ Loading Data
 #load in data 
 ny_raster_np_data <- rast('/Users/smarient/Documents/MacalesterCollege /Spring2026/BigDataEcology/EcoTopic2_NY/NY_rail_road_and_aviation_noise_2020.tif')
 
+#load in ebird data 
+
+bird_raw_data <- read.table('~/Library/CloudStorage/GoogleDrive-cwiley@macalester.edu/My Drive/1A: Spring 2026/Big Data in Ecology/EcoTopic2/ebd_US-NY_202001_202012_smp_relJan-2026/ebd_US-NY_202001_202012_smp_relJan-2026.txt', sep = "\t", header = TRUE, fill = TRUE)
+
+head(bird_raw_data)
+
+##taking out unneeded columns in ebird data 
+
+bird_wrangled<- bird_raw_data%>%
+  select(-LAST.EDITED.DATE, -TAXON.CONCEPT.ID, -EXOTIC.CODE, -BREEDING.CODE, -BREEDING.CATEGORY, -BEHAVIOR.CODE, -AGE.SEX, -COUNTRY, -COUNTRY.CODE, -STATE, -STATE.CODE, -OBSERVER.ID, -OBSERVER.ORCID.ID, -SAMPLING.EVENT.IDENTIFIER, -PROTOCOL.NAME, -PROTOCOL.CODE, -PROJECT.NAMES, -PROJECT.IDENTIFIERS, -APPROVED, -REVIEWED, -REASON, -HAS.MEDIA, -GROUP.IDENTIFIER, -NUMBER.OBSERVERS, -EFFORT.DISTANCE.KM, -EFFORT.AREA.HA, -DURATION.MINUTES)
+
+head(bird_wrangled)
+
 #preliminary map
 plot(ny_raster_np_data,
   col = terrain.colors(100),
@@ -96,6 +109,8 @@ NP aggregation by county & mapping
 Bird aggregation by county investigation
 ```{r}
 #basic map of all bird sightings in NY in 2020 to see if aggregating by county (which we suspect will be effective) is actually a good way to group the data
+
+#preliminary map
 
 #aggregate bird sightings by county 
 
