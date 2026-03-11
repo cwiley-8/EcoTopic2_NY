@@ -92,7 +92,7 @@ hist(ny_raster_np_data)
 
 #convert all zeroes to 45 decibels -- which is the lower end of the np scale measured; these places will not have actually zero noise pollution, especially in NYC, so the zeros will be misrepresentation 
 
-ny_raster_np_data[ny_raster_np_data == 0] <- 45
+#ny_raster_np_data[ny_raster_np_data == 0] <- 45
 plot(ny_raster_np_data)
 
 ny_raster_np_agg <- aggregate(ny_raster_np_data, fact = 5, fun = mean)
@@ -126,7 +126,7 @@ bird_initial_map
 
 ggplot(bird_spatial, aes(x=COUNTY)) + 
   geom_bar(fill="skyblue", color="black") +
-  labs(title="Sightings by County", x="County", y="Frequency") +
+  labs(title="Bird Sightings by County", x="County", y="Frequency") +
   theme_minimal()
 ```
 
