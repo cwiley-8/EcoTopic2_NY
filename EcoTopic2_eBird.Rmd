@@ -27,71 +27,9 @@ Increased volume of noise pollution will be associated with a decreased bird pop
 ```{r}
 #general definitions:
 ##NP = noise pollution 
-```
 
-Library
-```{r}
-#library any new packages we need to analyze 
-#comment what the package will be used for 
-library(dplyr)
-library(terra)
-library(sf)
-library(tmap)
-library(maps)
-library(ggplot2)
-```
+#Planned Data to use
 
-Loading Data
-```{r}
-#load in data 
-ny_raster_np_data <- rast('/Users/smarient/Documents/MacalesterCollege /Spring2026/BigDataEcology/EcoTopic2_NY/NY_rail_road_and_aviation_noise_2020.tif')
-
-#load in ebird data 
-
-bird_raw_data <- read.table('~/Library/CloudStorage/GoogleDrive-cwiley@macalester.edu/My Drive/1A: Spring 2026/Big Data in Ecology/EcoTopic2/Eco_Topic2_NY/ebd_US-NY_202001_202012_smp_relJan-2026/ebd_US-NY_202001_202012_smp_relJan-2026.txt', sep = "\t", header = TRUE, fill = TRUE)
-
-head(bird_raw_data)
-
-##taking out unneeded columns in ebird data 
-
-bird_wrangled<- bird_raw_data%>%
-  select(-LAST.EDITED.DATE, -TAXON.CONCEPT.ID, -EXOTIC.CODE, -BREEDING.CODE, -BREEDING.CATEGORY, -BEHAVIOR.CODE, -AGE.SEX, -COUNTRY, -COUNTRY.CODE, -STATE, -STATE.CODE, -OBSERVER.ID, -OBSERVER.ORCID.ID, -SAMPLING.EVENT.IDENTIFIER, -PROTOCOL.NAME, -PROTOCOL.CODE, -PROJECT.NAMES, -PROJECT.IDENTIFIERS, -APPROVED, -REVIEWED, -REASON, -HAS.MEDIA, -GROUP.IDENTIFIER, -NUMBER.OBSERVERS, -EFFORT.DISTANCE.KM, -EFFORT.AREA.HA, -DURATION.MINUTES)
-
-head(bird_wrangled)
-
-bird_wrangled <- bird_wrangled %>%
-  dplyr::mutate(
-    LATITUDE = as.numeric(LATITUDE),
-    LONGITUDE = as.numeric(LONGITUDE)
-  )%>%
- dplyr::filter(!is.na(LATITUDE) & !is.na(LONGITUDE))
-
-bird_nyc <- bird_wrangled%>%
-  filter(COUNTY %in% c("Bronx", "Kings", "New York", "Queens", "Richmond"))
-
-#preliminary map
-plot(ny_raster_np_data,
-  col = terrain.colors(100),
-  main = "Noise Pollution Map",
-  xlab = "Longitude",
-  ylab = "Latitude",
-  legend = TRUE)
-
-#convert all zeroes to 45 decibels 
-ny_raster_np_data[ny_raster_np_data == 0] <- 45
-plot(ny_raster_np_data)
-ny_raster_np_agg <- aggregate(ny_raster_np_data, fact = 5, fun = mean)
-plot(ny_raster_np_agg, col = rev(terrain.colors(50)))
-hist(ny_raster_np_data)
-```
-
-```{r}
-nyc_npboundary <- ext(1800000, 1900000, 2100000, 2230000)
-nyc_npcrop <- crop (ny_raster_np_agg, nyc_boundary)
-plot(nyc_npcrop, col = rev(terrain.colors(50)))
-```
-
-```{r}
 ##NP -- DOT Transportation 2020, clipping NYS: Continental U.S. road, freight and passenger rail, and aviation noise 2020
 #Link: https:/www.bts.gov/geospatial/national-transportation-noise-map 
 
@@ -103,49 +41,104 @@ plot(nyc_npcrop, col = rev(terrain.colors(50)))
 #head() all of these datasets to get a feel for their contents 
 ```
 
-
-
-NP Histogram
+Library
 ```{r}
-#make a histogram of the distribution of decibels of NP in NY to understand the data
+#library any new packages we need to analyze 
+#comment what the package will be used for 
+library(dplyr) 
+library(terra)
+library(sf) #using spatial data
+library(tmap) #mapping
+library(ggplot2) #vizualizations 
+```
 
+Loading Data
+```{r}
+#load in data 
+ny_raster_np_data <- rast('NY_rail_road_and_aviation_noise_2020.tif')
+
+#load in ebird data 
+
+bird_raw_data <- read.table('ebd_US-NY_202001_202012_smp_relJan-2026.txt', sep = "\t", header = TRUE, fill = TRUE)
+
+##taking out unneeded columns in ebird data 
+
+bird_wrangled<- bird_raw_data%>%
+  select(-LAST.EDITED.DATE, -TAXON.CONCEPT.ID, -EXOTIC.CODE, -BREEDING.CODE, -BREEDING.CATEGORY, -BEHAVIOR.CODE, -AGE.SEX, -COUNTRY, -COUNTRY.CODE, -STATE, -STATE.CODE, -OBSERVER.ID, -OBSERVER.ORCID.ID, -SAMPLING.EVENT.IDENTIFIER, -PROTOCOL.NAME, -PROTOCOL.CODE, -PROJECT.NAMES, -PROJECT.IDENTIFIERS, -APPROVED, -REVIEWED, -REASON, -HAS.MEDIA, -GROUP.IDENTIFIER, -NUMBER.OBSERVERS, -EFFORT.DISTANCE.KM, -EFFORT.AREA.HA, -DURATION.MINUTES)
+
+#changing lat and log to be numeric and filtering out nas 
+bird_wrangled <- bird_wrangled %>%
+  dplyr::mutate(
+    LATITUDE = as.numeric(LATITUDE),
+    LONGITUDE = as.numeric(LONGITUDE)
+  )%>%
+ dplyr::filter(!is.na(LATITUDE) & !is.na(LONGITUDE))
+
+#filtering for just NYC
+bird_nyc <- bird_wrangled%>%
+  filter(COUNTY %in% c("Bronx", "Kings", "New York", "Queens", "Richmond"))
+```
+
+Starting with NP Data
+```{r}
+#preliminary map
+plot(ny_raster_np_data,
+  col = terrain.colors(100),
+  main = "Noise Pollution Map",
+  legend = TRUE)
+
+hist(ny_raster_np_data)
+#tons of zeros 
+
+#convert all zeroes to 45 decibels -- which is the lower end of the np scale measured; these places will not have actually zero noise pollution, especially in NYC, so the zeros will be misrepresentation 
+
+ny_raster_np_data[ny_raster_np_data == 0] <- 45
+plot(ny_raster_np_data)
+
+ny_raster_np_agg <- aggregate(ny_raster_np_data, fact = 5, fun = mean)
+plot(ny_raster_np_agg, col = rev(terrain.colors(50)))
+hist(ny_raster_np_agg)
+
+#making np boundary for NYC
+nyc_npboundary <- ext(1800000, 1900000, 2100000, 2230000)
+nyc_npcrop <- crop (ny_raster_np_agg, nyc_boundary)
+plot(nyc_npcrop, col = rev(terrain.colors(50)))
+```
+
+NP Boxplots
+```{r}
 #are there clear bin lines that we can create to create an index for NP? Then could use that throughout our analysis to simplify the NP data -- if yes, explore with boxplots
 ```
 
-NP aggregation by county & mapping
+Bird Data Investigation
 ```{r}
-#aggregate NP by county in NY 
-
-#map decibels of NP across NY by county 
-```
-
-Bird aggregation by county investigation
-```{r}
-#basic map of all bird sightings in NY in 2020 to see if aggregating by county (which we suspect will be effective) is actually a good way to group the data
-
-#preliminary map
-
+#making it a spatial file 
 bird_spatial <- st_as_sf(bird_nyc, 
                          coords = c("LONGITUDE", "LATITUDE"), 
                          crs = 4326)
 
+#preliminary map
 bird_initial_map <- tm_shape(bird_spatial)+
   tm_dots("COUNTY")
-
-colnames(bird_spatial)
-
 bird_initial_map
 
-initial_bird_map <- ggplot(as.data.frame(bird_wrangled)) + 
-  geom_point(aes(x = "LONGITUDE", y = "LATITUDE"), size = 3)
-  
-initial_bird_map
-#aggregate bird sightings by county 
+#make a bar chart of the distribution of bird observations by county
 
-#make a histogram of the distribution of bird observations by county
-
-#make a bivariate map of the bird count and NP by county 
+ggplot(bird_spatial, aes(x=COUNTY)) + 
+  geom_bar(fill="skyblue", color="black") +
+  labs(title="Sightings by County", x="County", y="Frequency") +
+  theme_minimal()
 ```
+
+Extract NP value for each bird point 
+```{r}
+bird_np_extraction <- extract(ny_raster_np_data, bird_spatial)
+
+
+maybe bin them after scatterplot 
+
+```
+
 
 Exploring overall linear relationship
 ```{r}
@@ -162,24 +155,4 @@ Diving into specific species
 #create boxplots for the relationship between noise pollution index and each species count (differentiate by color)
 ```
 
-NYC Case Study 
-```{r}
-##make a histogram of the distribution of decibels of NP in NYC to understand the data
-
-###may need to create a new index for this -- as NYC will be louder than the rest of NY
-
-#map all bird sightings to familiarize with distribution across the city  
-###maybe by county with all points on top of that -- group by (county) -- and fill with color based on count  
-
-#create scatterplot for the relationship between NP and bird sightings 
-
-##run a lm on this^^^ relationship
-
-#create boxplots for the relationship between NP Index and bird count 
-
-
-##dive into the 5 most common birds analyzed above (same species)
-
-###create boxplots for the relationship between NP index and each species count (differentiate by color)
-```
 
