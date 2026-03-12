@@ -101,8 +101,8 @@ hist(ny_raster_np_agg)
 
 #making np boundary for NYC
 nyc_npboundary <- ext(1800000, 1900000, 2100000, 2230000)
-nyc_npcrop <- crop (ny_raster_np_agg, nyc_boundary)
-plot(nyc_npcrop, col = rev(terrain.colors(50)))
+nyc_npcrop <- crop (ny_raster_np_agg, nyc_npboundary)
+plot(nyc_npcrop, col = rev(terrain.colors(50)), main = "NYC Transportation Noise in Decibels")
 ```
 
 NP Boxplots
@@ -134,17 +134,48 @@ Extract NP value for each bird point
 ```{r}
 bird_np_extraction <- extract(ny_raster_np_data, bird_spatial)
 
+breaks <- c(40, 45, 50, 55, 60, 65, 70, 75, 80, 85)
 
-maybe bin them after scatterplot 
+labels <- c("40-45", "45-50", "50-55", "55-60", "60-65", "65-70", "70-75", "75-80", "80-85")
 
+# Create a new binned variable
+
+#making bins to make the boxplot in the next step
+bird_np_bins <- cut(bird_np_extraction[,2],
+                  breaks = breaks,
+                  labels = labels,
+                  right = FALSE) 
+
+bird_np_bins_barchart <- data.frame(
+  np_value = bird_np_extraction[,2],
+  np_bin = bird_np_bins
+)
 ```
 
 
 Exploring overall linear relationship
 ```{r}
-#create a scatterplot for the relationship between noise pollution and bird sightings (expecting a negative linear relationship)
+#create a bar chart for the relationship between noise pollution and bird sightings
 
-#run a lm on this relationship 
+bird_np_bins_barchart%>%
+  ggplot(aes(x = np_bin)) +
+  geom_bar(fill = "skyblue", color = "black")+
+  labs(title = "Bird Sightings against NP", x = "NP", y = "BirdSightings")+
+  theme_classic() 
+
+#TONS OF NAs -- 150,000
+sum(is.na(bird_np_bins_barchart$np_value))
+
+#removing nas 
+bird_np_bins_barchart <- na.omit(bird_np_bins_barchart)
+
+#barchart with no nas 
+bird_np_bins_barchart%>%
+  ggplot(aes(x = np_bin)) +
+  geom_bar(fill = "skyblue", color = "black")+
+  labs(title = "Bird Sightings at Varied Noise Decibels", x = "Noise in Decibels", y = "Bird Sightings")+
+  theme_classic() 
+
 ```
 
 Diving into specific species  
